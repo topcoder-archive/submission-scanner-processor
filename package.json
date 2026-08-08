@@ -25,7 +25,7 @@
     "@aws-sdk/client-s3": "^3.391.0",
     "@ronomon/pure": "^1.0.4",
     "amazon-s3-uri": "^0.1.1",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "bluebird": "^3.7.2",
     "clamav.js": "^0.12.0",
     "config": "^3.3.9",
