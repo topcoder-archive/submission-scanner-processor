@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-- nodejs https://nodejs.org/en/ (v8+)
+- nodejs https://nodejs.org/en/ (22.23.2)
 - Kafka
 - Docker, Docker Compose (Only for deployment with Docker)
 
@@ -152,3 +152,29 @@ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic avscan.action
 ```
 
 Token Commit.
+
+## Keycloak migration branch
+
+`keycloak_m2M` pins shared core 4.0.0-keycloak.0 at
+`c262f4aca971904f308085bdeaaed35cdf3cfa7d`. Configure `M2M_PROVIDER=keycloak`,
+`KEYCLOAK_ISSUER`, `KEYCLOAK_AUDIENCE`, `KEYCLOAK_TOKEN_URL`,
+`KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`, and optionally `KEYCLOAK_SCOPE`.
+Use the HTTPS managed endpoint and grant `write:bus_api`. See
+`docker/sample.api.env`. A persistent shared-core provider verifies all issued
+RS256 tokens before Bus transport and owns cache expiry; Auth0 proxy fallback
+and unverified token caching are removed. Webhook credentials remain independent.
+
+`yarn lint`, `yarn run build` (JavaScript syntax validation), and
+`yarn test:keycloak` exercise the migration without external writes. The legacy
+scanner suite additionally needs ClamAV, file fixtures and S3 access. Supply the
+new dedicated settings before any future deployment; CI excludes this branch
+and existing DEV services are not deployed by this change.
+
+Validation evidence: lint/build and signed-token transport tests pass, including
+live DEV issuance with mocked Bus transport. The legacy scanner suite has three
+failures because its fixtures omit `message.payload.moveFile`; the same failures
+reproduce on unchanged commit `81dd53d3` with its Node 18.16.1 runtime and
+independently installed dependencies. Its original lockfile is out of sync with
+package.json (frozen install fails); baseline installation required resolution.
+The migration replaces the fixture's undeclared `uuid/v4` dependency with Node's
+`randomUUID` so the suite can reach those existing fixture validation failures.

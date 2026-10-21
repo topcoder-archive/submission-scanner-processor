@@ -2,21 +2,13 @@
  * Contains generic helper methods
  */
 
-const _ = require('lodash')
 const config = require('config')
 const clamav = require('clamav.js')
 const logger = require('./logger')
 const request = require('axios').default
 const m2mAuth = require('tc-core-library-js').auth.m2m
 const { S3Client, HeadObjectCommand, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
-const m2m = m2mAuth(
-  _.pick(config, [
-    'AUTH0_URL',
-    'AUTH0_AUDIENCE',
-    'TOKEN_CACHE_TIME',
-    'AUTH0_PROXY_SERVER_URL'
-  ])
-)
+const m2m = m2mAuth(config)
 const AmazonS3URI = require('amazon-s3-uri')
 const pure = require('@ronomon/pure')
 const { WEBHOOK_AUTH_METHODS } = require('./constants')
@@ -304,14 +296,13 @@ async function scanWithClamAV (fileStream) {
   }
 }
 
-/* Function to get M2M token
- * @returns {Promise}
+/** Obtain a cached or newly verified Keycloak token for Bus publishing.
+ * Takes no arguments and uses explicit KEYCLOAK_* configuration.
+ * @returns {Promise<string>} RS256 service token verified by shared core.
+ * @throws {Error} Sanitized shared-core errors on issuance/validation failure.
  */
 async function getM2Mtoken () {
-  return m2m.getMachineToken(
-    config.AUTH0_CLIENT_ID,
-    config.AUTH0_CLIENT_SECRET
-  )
+  return m2m.getMachineToken()
 }
 
 /**

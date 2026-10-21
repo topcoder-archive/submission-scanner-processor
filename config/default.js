@@ -40,12 +40,14 @@ module.exports = {
   MAX_SCAN_FILE_SIZE_BYTES: parsePositiveInteger(process.env.MAX_SCAN_FILE_SIZE_BYTES, DEFAULT_MAX_SCAN_FILE_SIZE_BYTES),
   SCAN_CONCURRENCY: parsePositiveInteger(process.env.SCAN_CONCURRENCY, DEFAULT_SCAN_CONCURRENCY),
   BUSAPI_EVENTS_URL: process.env.BUSAPI_EVENTS_URL || 'https://api.topcoder-dev.com/v5/bus/events',
-  AUTH0_URL: process.env.AUTH0_URL, // Auth0 credentials for Submission scoring processor
-  AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE,
-  TOKEN_CACHE_TIME: process.env.TOKEN_CACHE_TIME,
-  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
-  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
-  AUTH0_PROXY_SERVER_URL: process.env.AUTH0_PROXY_SERVER_URL,
+  // Explicit Keycloak provider configuration; no Auth0 issuance fallback.
+  M2M_PROVIDER: process.env.M2M_PROVIDER,
+  KEYCLOAK_ISSUER: process.env.KEYCLOAK_ISSUER,
+  KEYCLOAK_AUDIENCE: process.env.KEYCLOAK_AUDIENCE,
+  KEYCLOAK_TOKEN_URL: process.env.KEYCLOAK_TOKEN_URL,
+  KEYCLOAK_CLIENT_ID: process.env.KEYCLOAK_CLIENT_ID,
+  KEYCLOAK_CLIENT_SECRET: process.env.KEYCLOAK_CLIENT_SECRET,
+  KEYCLOAK_SCOPE: process.env.KEYCLOAK_SCOPE,
 
   // Whitelisted buckets and topics
   WHITELISTED_CLEAN_BUCKETS: process.env.WHITELISTED_CLEAN_BUCKETS ? process.env.WHITELISTED_CLEAN_BUCKETS.split(',') : [],

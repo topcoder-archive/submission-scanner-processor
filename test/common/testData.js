@@ -2,7 +2,7 @@
  * Test data to be used in tests
  */
 
-const uuid = require('uuid/v4')
+const { randomUUID: uuid } = require('node:crypto')
 
 const goodSubmission = {
   topic: 'submission.notification.create',
