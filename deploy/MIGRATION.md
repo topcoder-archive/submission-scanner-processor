@@ -2,7 +2,7 @@
 
 The read-only production inventory on 2026-11-03 found `av-scanner-service-serverless/file-scanning-processor-svc` with both desired and running counts zero. This PR removes the old Auth0 credential broker, SSM-to-shell helper and `org-global` context from CircleCI and blocks the local deployment entry points. It does not reactivate, delete or modify any AWS service. No replacement IAM role is provisioned for an inactive workload.
 
-`prod-inactive-baseline.json` records the exact observed task/role/container identifiers and runtime secret references only, not values. Zero capacity is an observation, not a declaration that this service is permanently retired. The CI job explicitly reports that deployment is disabled; it does not claim an application build or rollout succeeded.
+[prod-inactive-baseline.json](https://github.com/topcoder-platform/v6-services-iac/blob/main/services/submission-scanner-processor/deploy/prod-inactive-baseline.json) records the exact observed task/role/container identifiers and runtime secret references only, not values. Zero capacity is an observation, not a declaration that this service is permanently retired. The CI job explicitly reports that deployment is disabled; it does not claim an application build or rollout succeeded.
 
 Before merging, confirm with the service owner whether to keep this workload inactive or plan a separately reviewed reactivation. Remove this project's Auth0/static AWS variables and shared-context access in CircleCI and disable any other old release jobs. Removing a context from YAML alone does not remove project-level variables or revoke the legacy shared AWS role. Do not revoke that shared role until its remaining consumers migrate.
 
@@ -11,3 +11,7 @@ A future reactivation must adopt [tc-deploy-scripts #40](https://github.com/topc
 This PR targets the existing `master` branch. Apply the deployment disablement to every still-enabled release branch/job before revoking credentials. The saved dev AWS session is expired, so dev state is not asserted. No live reactivation test was attempted.
 
 The active replacement is `av-scanner-v6` in the same cluster. Both scanner services share a Kafka consumer group; do not give both positive capacity. Review the replacement migration and rollback runbook before any legacy restart.
+
+## Infrastructure source
+
+IAM templates and detailed AWS baselines are maintained in the private [v6-services-iac service directory](https://github.com/topcoder-platform/v6-services-iac/tree/main/services/submission-scanner-processor). Provision infrastructure separately with an administrator identity; application CI does not fetch that repository or install IAM. Required application manifests and health-check proposals remain here.
