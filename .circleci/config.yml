@@ -1,76 +1,14 @@
-version: 2
-defaults: &defaults
-  docker:
-    - image: cimg/python:3.13.2-browsers
-install_dependency: &install_dependency
-  name: Installation of build and deployment dependencies.
-  command: |
-    sudo apt update
-    sudo apt install -y jq python3-pip
-    sudo pip3 install awscli --upgrade    
-    sudo curl -o /usr/local/bin/ecs-cli https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest  
-    sudo chmod +x /usr/local/bin/ecs-cli
-install_deploysuite: &install_deploysuite
-  name: Installation of install_deploysuite.
-  command: |
-    git clone --branch v1.4.20 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
-    cp ./../buildscript/master_deploy.sh .
-    cp ./../buildscript/buildenv.sh .
-    cp ./../buildscript/awsconfiguration.sh .
-    cp ../buildscript/psvar-processor.sh .
-
-build_and_deploy_steps: &build_and_deploy_steps
-    - checkout
-    - setup_remote_docker
-    - run: *install_dependency
-    - run: *install_deploysuite
-    - deploy:
-        name: Running deployment.
-        command: |
-          ./awsconfiguration.sh $DEPLOY_ENV 
-          source awsenvconf
-          # ./buildenv.sh -e DEV -b dev-global-appvar,dev-file-scanner-processor-buildvar
-          # source buildenvvar
-          ./psvar-processor.sh -t appenv -p /config/common/global-appvar
-          source global-appvar_env
-          ./psvar-processor.sh -t appenv -p /config/${APPNAME}/buildvar
-          source buildvar_env
-          ./deploy.sh $AWS_ECS_CLUSTER $DEPLOY_ENV    
-
+version: 2.1
 jobs:
-  # Build & Deploy against development backend
-  "build-dev":
-    <<: *defaults
-    environment:
-        DEPLOY_ENV: 'DEV'
-        LOGICAL_ENV: 'dev'
-        APPNAME: 'file-scanner-processor'
-        DEPLOYMENT_ENVIRONMENT: 'dev'    
-    steps: *build_and_deploy_steps
-
-
-  "build-prod":
-    <<: *defaults
-    environment:
-        DEPLOY_ENV: 'PROD'
-        LOGICAL_ENV: 'prod'
-        APPNAME: 'file-scanner-processor'
-        DEPLOYMENT_ENVIRONMENT: 'PROD'       
-    steps: *build_and_deploy_steps
-
+  deployment-disabled:
+    docker:
+    - image: cimg/aws@sha256:4cf3768db00ddf9bc439b8c84e8a60c11a14edf81c8baf76f74132144f8340d5
+    steps:
+    - run:
+        name: 'Inactive ECS service: automatic deployment disabled'
+        command: printf '%s\n' 'No image is published and no AWS session is requested. See deploy/MIGRATION.md before any
+          reactivation.'
 workflows:
-  version: 2
-  build:
+  inactive-service:
     jobs:
-      # Development builds are executed on "develop" branch only.
-      - "build-dev":
-          context: org-global
-          filters:
-            branches:
-              only:
-                - develop
-      - "build-prod":
-          context: org-global
-          filters:
-            branches:
-              only: master
+    - deployment-disabled
